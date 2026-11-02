@@ -16,6 +16,7 @@ I keep my apps in dark mode, but many web pages and documents are still white. E
 - Stays out of screen shares. People who watch your screen see the normal screen.
 - Runs from the menu bar, with no Dock icon.
 - Starts at login. You can turn this off.
+- Can work only during calls. It turns on while an app uses your microphone or camera.
 
 ## Requirements
 
@@ -84,8 +85,9 @@ Click the sun icon in the menu bar to open the menu.
 
 | Item | Function |
 | --- | --- |
-| Status line | Shows the number of displays that the app smooths, or shows a problem. |
+| Status line | Shows the number of displays that the app smooths, "Waiting for a call", or a problem. |
 | **Enabled** | Turns the smoothing on or off. |
+| **Only During Calls** | Smooths only while an app uses a microphone or a camera, for example during a video call. This is off by default. |
 | **Fade Duration** | Sets the time a fade takes to get 95% of the way to the new brightness: 0.5, 1, 1.5, 2, 3, 5, 7, or 10 seconds. The default is 3 seconds. |
 | **Start at Login** | Opens the app when you log in. This is on by default. |
 | **Quit** | Closes the app. |
@@ -102,12 +104,15 @@ The app checks its state once a minute. If the Screen Recording permission or th
 
 When the two values match, the app stops the animation until the next change. When you connect or disconnect a display, the app starts its measurements again.
 
+When **Only During Calls** is on, the app checks once a second if any app records audio or uses a camera. Meeting notetakers use the same signal to detect a call. An app that only plays audio does not count.
+
 ## Privacy
 
 The Screen Recording permission lets an app see everything on your screen. This is what Slow Window Switcher does with it:
 
 - The app captures a 128-pixel-wide image of each display. It reduces each image to one number: the mean brightness.
 - The app does not save the images. It does not send data anywhere. The app has no network code.
+- To detect a call, the app reads if a microphone or a camera is in use. It does not record audio or video, and it needs no more permissions.
 - All of the app code is in one file, [`main.swift`](main.swift). You can read all of it.
 
 ## Limits
