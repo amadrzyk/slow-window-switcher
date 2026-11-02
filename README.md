@@ -73,7 +73,7 @@ Click the sun icon in the menu bar to open the menu.
 | --- | --- |
 | Status line | Shows the number of displays that the app smooths, or shows a problem. |
 | **Enabled** | Turns the smoothing on or off. |
-| **Fade Duration** | Sets the time a fade takes to get 95% of the way to the new brightness: 0.5, 1, 1.5, 2, or 3 seconds. The default is 3 seconds. |
+| **Fade Duration** | Sets the time a fade takes to get 95% of the way to the new brightness: 0.5, 1, 1.5, 2, 3, 5, 7, or 10 seconds. The default is 3 seconds. |
 | **Start at Login** | Opens the app when you log in. This is on by default. |
 | **Quit** | Closes the app. |
 
@@ -83,7 +83,7 @@ The app checks its state once a minute. If the Screen Recording permission or th
 
 ## How it works
 
-1. **Measure.** For each display, the app uses ScreenCaptureKit to capture a small image, 128 pixels wide, at up to 60 frames per second. It calculates the mean light output (linear luminance) of that image. The capture does not include the app's own overlay.
+1. **Measure.** For each display, the app uses ScreenCaptureKit to capture a small image, 128 pixels wide, at the refresh rate of the display. It calculates the mean light output (linear luminance) of that image. The capture does not include the app's own overlay.
 2. **Follow.** The app keeps a second value: the brightness that you see. A critically damped spring moves that value toward the measured brightness. The spring eases in and out, and it does not overshoot. The app uses a log scale, because the eye responds to ratios of light, not to differences.
 3. **Cover.** A full-screen, click-through window sits above all other windows. When the screen gets brighter, the window shows black at partial opacity, so the screen stays at the old level. When the screen gets darker, the window shows white at partial opacity. The overlay then fades to clear as the spring catches up.
 
@@ -99,6 +99,7 @@ The Screen Recording permission lets an app see everything on your screen. This 
 
 ## Limits
 
+- The app sees a new frame only after macOS shows it. The first one or two frames of a jump appear at full brightness, before the overlay covers them.
 - The app measures the mean brightness of the whole display. A small bright window on a dark screen causes only a small change.
 - The app reacts to all changes on the screen, not only to window switches. Video scene cuts and page loads also fade. To stop this, turn off **Enabled**.
 - When the screen gets darker, the white overlay lowers the contrast for a short time.

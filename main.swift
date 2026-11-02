@@ -38,6 +38,7 @@ final class DisplaySmoother: NSObject, SCStreamOutput, SCStreamDelegate {
     let displayID: CGDirectDisplayID
     var onStop: (() -> Void)?
 
+    private let framesPerSecond: Int
     private let window: NSWindow
     private let overlay: CALayer
     private var displayLink: CADisplayLink?
@@ -51,6 +52,7 @@ final class DisplaySmoother: NSObject, SCStreamOutput, SCStreamDelegate {
 
     init(screen: NSScreen) {
         displayID = (screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber)?.uint32Value ?? 0
+        framesPerSecond = max(60, screen.maximumFramesPerSecond)
         window = NSWindow(contentRect: screen.frame, styleMask: .borderless, backing: .buffered, defer: false)
         window.setFrame(screen.frame, display: false)
         window.isOpaque = false
@@ -76,7 +78,8 @@ final class DisplaySmoother: NSObject, SCStreamOutput, SCStreamDelegate {
         let config = SCStreamConfiguration()
         config.width = 128
         config.height = max(1, 128 * display.height / display.width)
-        config.minimumFrameInterval = CMTime(value: 1, timescale: 60)
+        // Capture at the full refresh rate, so a change gets to the overlay as soon as possible.
+        config.minimumFrameInterval = CMTime(value: 1, timescale: CMTimeScale(framesPerSecond))
         config.pixelFormat = kCVPixelFormatType_32BGRA
         config.colorSpaceName = CGColorSpace.sRGB
         config.showsCursor = false
@@ -129,8 +132,10 @@ final class DisplaySmoother: NSObject, SCStreamOutput, SCStreamDelegate {
 
     private func setActual(_ luminance: Float) {
         let value = logf(max(luminance, minLuminance))
-        if actual == nil { shown = value }
+        if actual == nil || !Settings.enabled { shown = value }
         actual = value
+        // Cover the new frame now. A paused display link can take one more frame to tick.
+        applyOverlay(actual: value)
         displayLink?.isPaused = false
     }
 
@@ -283,7 +288,7 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
         enabledItem = menu.addItem(withTitle: "Enabled", action: #selector(toggleEnabled), keyEquivalent: "")
         enabledItem.target = self
         let fadeMenu = NSMenu()
-        for seconds in [0.5, 1, 1.5, 2, 3] {
+        for seconds in [0.5, 1, 1.5, 2, 3, 5, 7, 10] {
             let item = fadeMenu.addItem(withTitle: "\(seconds.formatted()) s", action: #selector(setFade(_:)), keyEquivalent: "")
             item.target = self
             item.representedObject = seconds
