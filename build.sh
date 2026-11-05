@@ -10,8 +10,9 @@ BUILD=build/SlowWindowSwitcher.app
 APP=/Applications/SlowWindowSwitcher.app
 
 rm -rf "$BUILD"
-mkdir -p "$BUILD/Contents/MacOS"
+mkdir -p "$BUILD/Contents/MacOS" "$BUILD/Contents/Resources"
 cp Info.plist "$BUILD/Contents/"
+cp AppIcon.icns "$BUILD/Contents/Resources/"
 swiftc -O -swift-version 5 -target "$(uname -m)-apple-macos14" main.swift -o "$BUILD/Contents/MacOS/SlowWindowSwitcher"
 # A local build does not need a timestamp from Apple's server.
 codesign --force --timestamp=none --sign "$IDENTITY" "$BUILD"

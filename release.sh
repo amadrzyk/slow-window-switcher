@@ -17,8 +17,9 @@ ZIP=$OUT/SlowWindowSwitcher-$VERSION.zip
 git diff --quiet HEAD || { echo "Commit your changes first."; exit 1; }
 
 rm -rf "$OUT"
-mkdir -p "$APP/Contents/MacOS"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp Info.plist "$APP/Contents/"
+cp AppIcon.icns "$APP/Contents/Resources/"
 for arch in arm64 x86_64; do
     swiftc -O -swift-version 5 -target "$arch-apple-macos14" main.swift -o "$OUT/SlowWindowSwitcher-$arch"
 done
